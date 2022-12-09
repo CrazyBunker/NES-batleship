@@ -53,7 +53,7 @@
       : 
         txa 
         pha
-        jsr next_step_player
+        ;jsr next_step_player
         jsr update_tile_player
         pla
         tax
@@ -64,7 +64,7 @@
       : 
         txa 
         pha
-        jsr next_step_player
+        ;jsr next_step_player
         jsr update_sprite_player
         pla
         tax
