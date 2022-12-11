@@ -34,20 +34,185 @@
   rts
 .endproc
 ; Загрузка карты
+; Получаем количество палуб на корабле, просталяем в таблицу корабль как номер корабля
 .proc load_to_table1
   ldx ship_count
   inx
   @loop:
+      lda player_x_map
+      pha
+      lda player_y_map
+      pha
+
+      lda ship_orient
+      beq @1
+        txa
+        clc
+        adc player_y_map
+        sec
+        sbc #$1 
+        sta player_y_map
+        jmp @2
+      @1:
+        txa
+        clc
+        adc player_x_map
+        sec
+        sbc #$1
+        sta player_x_map
+      @2:
+
       jsr get_address
-      lda #1
+      lda ship_current
       sta table_1,y
+      jsr set_zone
+      pla
+      sta player_y_map
+      pla
+      sta player_x_map
       dex
   beq :+
     jmp @loop
   :
+
   lda #0
   sta player_y_map
   sta player_x_map
+  rts
+.endproc
+
+.proc set_zone
+  ; уменьшаем значение y на поле и проверяем не вышли ли за границы, если вышли, то возвращаем значение обратно и пропускаем шаг
+  lda player_y_map  ; Сохраняем player_y_map в стек
+  pha
+  lda player_x_map  ; Сохраняем player_x_map в стек
+  pha
+
+  dec player_y_map  ; уменьшаем y и проверяем не вышли ли мы за границы, если вышли, то верхей части поля нет
+  ;  ^
+  ;  X
+  bpl :+
+    jmp @exit_up_zone
+  :
+  ; если сверху есть место для зоны, то ставим 20
+  jsr write_zone
+  ; уменьшаем x и проверяем не вышли ли мы за границы 
+  ;    < ^
+  ;      X
+  dec player_x_map
+  bpl :+
+  ; если вышли за границы, то уменьшаем размер корабля на 1
+  ; | ^
+  ; | X
+     inc player_x_map
+     jmp @exit_up_left_zone
+  :
+  jsr write_zone
+  ;  ^
+  ;  X
+  inc player_x_map
+  @exit_up_left_zone:
+  ;  ^ >
+  ;  X
+  inc player_x_map
+  lda #10
+  cmp player_x_map
+  bne :+
+  ; ^ |
+  ; X |
+    dec player_x_map
+    jmp @exit_up_zone
+  :
+  jsr write_zone
+  ; ^ |
+  ; X |
+  dec player_x_map
+  @exit_up_zone:
+  ;   |
+  ; X |      
+  inc player_y_map
+  ; Выгружаем обратно, то что загрузили в стек
+  ; < X ;
+  dec player_x_map
+  bpl :+
+    ; X ;
+    inc player_x_map
+    jmp @exit_left_zone
+  :  
+  jsr write_zone
+  ; X ;
+  inc player_x_map
+  @exit_left_zone:
+  ; X >;
+  inc player_x_map
+  lda #10
+  cmp player_x_map
+  bne :+
+     ; X |;
+     dec player_x_map
+     jmp @exit_right_zone
+  :
+  ; X → ;
+  jsr write_zone
+  ; X ;
+  dec player_x_map
+  @exit_right_zone:
+  ; X ;
+  ; ↓ ;
+  inc player_y_map
+  lda #10
+  cmp player_y_map
+  bne :+
+     jmp @exit_down_zone
+  :
+  jsr write_zone
+  ;  X ;
+  ;← ↓ ;  
+  dec player_x_map
+  bpl :+
+    ; X ;
+    inc player_x_map
+    jmp @exit_down_left_zone
+  :  
+  jsr write_zone
+  ; X ;
+  ; ↓ ;
+  inc player_x_map
+  @exit_down_left_zone:
+  ; X  ;
+  ; ↓ →;
+  inc player_x_map
+  lda #10
+  cmp player_x_map
+  bne :+
+  ; X  ;
+  ; ↓ ;
+     dec player_x_map
+     jmp @exit_down_right_zone
+  :  
+  jsr write_zone
+  ; X ;
+  ; ↓ ;
+  dec player_x_map
+  @exit_down_right_zone:
+  ; X ;
+  ; ↓ ;  
+  dec player_y_map
+  @exit_down_zone:
+  pla
+  sta player_x_map
+  pla
+  sta player_x_map
+
+  rts
+.endproc
+.proc write_zone
+  jsr get_address
+  lda table_1,y
+  bne :+
+    lda #20
+    sta table_1,y
+  :
   rts
 .endproc
 

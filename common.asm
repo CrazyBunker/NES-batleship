@@ -9,47 +9,21 @@
 .endproc
 
 ; Получить смещение корабля на карте (0-100)
-; Параметры, X - длина корабля (1-4) (смещение от начальных координат)
 ; player_y_map
 ; player_x_map
-; tmp_addr - буфер
 .proc get_address
-  lda ship_orient
-  beq @1
-    txa
-    jmp @2
-  @1:
-    lda #1
-  @2:
-  clc
-  adc player_y_map
-  tay
-  dey
+  lda #0
+  ldy player_y_map
   beq @exit
-    lda #0
     : 
       clc
       adc #10
       dey
     bne :-
-    tay
-    ;y = номер строки
-  @exit:  
-  lda ship_orient
-  bne @3
-    txa
-    jmp @4
-  @3:
-    lda #1
-  @4:
+  @exit: 
     clc
     adc player_x_map
-    sta tmp_addr
-    tya
-    clc
-    adc tmp_addr
     tay
-    dey
     rts
 .endproc
 
@@ -59,16 +33,7 @@
 ; player_x_map_player
 ; tmp_addr - буфер
 .proc get_address_player
-  lda ship_orient
-  beq @1
-    txa
-    jmp @2
-  @1:
-    lda #1
-  @2:
-  clc
-  adc player_y_map_player
-  tay
+  ldy player_y_map_player
   dey
   beq @exit
     lda #0
@@ -77,29 +42,15 @@
       adc #10
       dey
     bne :-
-    tay
     ;y = номер строки
   @exit:  
-  lda ship_orient
-  bne @3
-    txa
-    jmp @4
-  @3:
-    lda #1
-  @4:
     clc
     adc player_x_map_player
-    sta tmp_addr
-    tya
-    clc
-    adc tmp_addr
-    tay
-    dey
     rts
 .endproc
 
 
-; Загрузка карты в таблицу table_2
+; Загрузка карты в таблицу table_2 (Статическая загрузка предустановленной карты, будет заменена на генерацию, в будущем)
 .proc load_map
   lda map_count
   asl a
@@ -220,15 +171,44 @@
   rts
 .endproc
 
-; Проверка корабля, возвращает 1 в X если есть пересечение
+; Проверка корабля, возвращает 1 в X если есть пересечение (Перессечение определяется из таблицы table_1 - если получено значение - не ноль, то X = 1 )
 .proc get_ship_from_table1
   ldx ship_count
   inx
   @loop:
+      lda player_x_map
+      pha
+      lda player_y_map
+      pha
+
+      lda ship_orient
+
+      beq @1
+        txa
+        clc
+        adc player_y_map
+        sec
+        sbc #$1
+        sta player_y_map
+        jmp @2
+      @1:
+        txa
+        clc
+        adc player_x_map
+        sec
+        sbc #$1 
+        sta player_x_map
+      @2:
       jsr get_address
-      lda #1
+
+      pla
+      sta player_y_map
+      pla
+      sta player_x_map
+
+      lda #0
       cmp table_1,y
-      beq @exit_bad
+      bne @exit_bad
       dex
   beq @exit_good
     jmp @loop
@@ -238,10 +218,9 @@
   rts
 .endproc
 
+; Проверка поадания противника, результат записывается в table_player
 .proc get_ship_from_table1_player
-  ldx #1
   jsr get_address_player
-
   lda #0
   cmp table_1,y
   beq :+
@@ -252,7 +231,6 @@
   lda #1
   cmp table_1,y
   beq :+
-  bcc @repeat
     jmp @2
   :
     ldx #6
@@ -262,8 +240,6 @@
   sta ship_fire_player
   sta table_player,y
   jmp @exit
-  @repeat:
-    ldx #5
   @exit:
   rts
 .endproc

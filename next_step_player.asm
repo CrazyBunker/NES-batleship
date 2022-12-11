@@ -2,12 +2,12 @@
   inc player_y_map_player
   lda player_y_map_player
   cmp #10
-  beq :++
+  bne :++
     dec player_y_map_player
     inc player_x_map_player
     lda player_x_map_player
     cmp #10
-    beq :+
+    bne :+
       dec player_x_map_player
       dec player_x_map_player
     :
@@ -19,21 +19,21 @@
   ; Получить значение в таблице противника (0, 6 , 7)
   cmp #0
   ; если клетка пустая, то
-  beq :+
+  bne :+
      jmp @exit   
   :
   cmp #6
   ; если получил клетку с попаданием
-  beq :+++
+  bne :+++
      dec player_x_map_player
      lda player_x_map_player
      cmp #$FF
-     beq :++
+     bne :++
        inc player_x_map_player
        dec player_y_map_player
        lda player_y_map_player
        cmp #$FF
-       beq :+
+       bne :+
            inc player_y_map_player
            inc player_x_map_player
        :
@@ -42,16 +42,16 @@
   :
   cmp #7
   ; если ппоал на клетку с промахом
-  beq @exit
+  bne @exit
      dec player_x_map_player
      lda player_x_map_player
      cmp #$FF
-     beq :++
+     bne :++
        inc player_x_map_player
        dec player_y_map_player
        lda player_y_map_player
        cmp #$FF
-       beq :+
+       bne :+
            inc player_y_map_player
            inc player_x_map_player
        :

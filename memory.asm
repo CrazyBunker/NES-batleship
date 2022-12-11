@@ -21,10 +21,10 @@ y_min: .byte 0
 y_max: .byte 0
 count_max:       .byte 0
 ship_current: .byte 0
-phaze: .res 0
-table_1: .res 100
-table_2: .res 100
-table_player: .res 100
+phaze: .byte 0
+table_1: .res 100  ; Таблица расстановки игрока 1 (1) Player
+table_2: .res 100  ; Таблица расстановки игрока 2 (2) PC
+table_player: .res 100 ; Таблица поля боя игрока 2 (2) PC
 
 
 .segment "OAM"

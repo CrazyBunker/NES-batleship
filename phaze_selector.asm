@@ -44,6 +44,8 @@
       @next:
       jsr down_indicator
       jsr update_tile
+
+      jsr next_step_player
       @iter:
       jsr get_ship_from_table1_player
       ; x - 6 попал, 7 мимо; 5 - повтор
@@ -53,7 +55,6 @@
       : 
         txa 
         pha
-        ;jsr next_step_player
         jsr update_tile_player
         pla
         tax
@@ -64,8 +65,8 @@
       : 
         txa 
         pha
-        ;jsr next_step_player
         jsr update_sprite_player
+        jsr next_step_player
         pla
         tax
         jmp @iter
