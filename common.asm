@@ -78,22 +78,20 @@
 ; Получить статус объекта на карте противника
 ; Процедуры: get_address - получить смещение на карте, в зависимости от координат прицела
 ; Переменные: player1_scoope - количество неподбитых единиц кораблей на карте противника
-; ship_fire - стаатус последнего выстрела: 6 попал, 7 мимо (номер совпадает с номером тайла, который отображается )
+; ship_fire - статус последнего выстрела: 16 попал, 17 мимо (номер совпадает с номером тайла, который отображается )
 
 .proc get_ship_from_map
-  ldx #1
   jsr get_address
 
   lda #0
   cmp table_2,y
-  beq :+
-    jmp @1
-  :
+  bne @1
     ldx #7
+    jmp @2
   @1:
-  lda #1
+  lda #20
   cmp table_2,y
-  beq :+
+  bcs :+
   bcc @repeat
     jmp @2
   :
@@ -102,12 +100,41 @@
   @2:
   txa
   sta ship_fire
+  clc
+  adc #20
   sta table_2,y
   jmp @exit
   @repeat:
     ldx #5
   @exit:
   rts
+.endproc
+
+.proc scan_ship
+   ldx #1
+   : 
+     lda #1
+     cmp table_ships_player-1,x
+     beq @continue
+   ldy #0
+   txa
+   :
+     cmp table_2,y
+     beq @continue
+     iny
+   cpy #100
+   bne :-
+   lda #1
+   sta table_ships_player-1,x
+   jmp @exit
+   @continue:
+   inx
+   cpx #11
+   bne :--
+   lda #0
+   @exit:
+   tax
+   rts
 .endproc
 
 ; Вычисление границ поля (в зависимости от длины корабля)

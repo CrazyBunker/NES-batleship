@@ -25,6 +25,8 @@ phaze: .byte 0
 table_1: .res 100  ; Таблица расстановки игрока 1 (1) Player
 table_2: .res 100  ; Таблица расстановки игрока 2 (2) PC
 table_player: .res 100 ; Таблица поля боя игрока 2 (2) PC
+table_ships_player: .res 10 ; Таблица с состояниями кораблей противника (1-10 корабль)
+
 
 
 .segment "OAM"
@@ -41,3 +43,4 @@ ship9: .res 4
 ship10: .res 4
 ship_cursor: .res 4
 indicator: .res 4
+indicator_kill: .res 16

@@ -37,15 +37,30 @@
          jsr up_indicator
          jmp @exit
       :
+      cpx #$07
+      bne :+
+        jsr down_indicator_kill
+      :
+      cpx #$06
+      bne :++
+         jsr scan_ship ;(портит X, Y)
+         cpx #1
+         bne :+
+            jsr up_indicator_kill
+            jmp @1_2
+         :
+         jsr down_indicator_kill
+         @1_2:
+      :
       lda player1_scoope
       bne @next
         jsr up_indicator
-        jmp @exit
+        rts
       @next:
       jsr down_indicator
       jsr update_tile
 
-      jsr next_step_player
+      ;jsr next_step_player
       @iter:
       jsr get_ship_from_table1_player
       ; x - 6 попал, 7 мимо; 5 - повтор
@@ -66,7 +81,7 @@
         txa 
         pha
         jsr update_sprite_player
-        jsr next_step_player
+        ;jsr next_step_player
         pla
         tax
         jmp @iter
@@ -86,7 +101,7 @@
     lda #09
     cmp ship_current
     bne :+
-       inc phaze
+        inc phaze
     :
     jsr load_to_table1
     jsr load_ship
