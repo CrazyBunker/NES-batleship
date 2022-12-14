@@ -14,7 +14,7 @@
     cmp #0
     bne :+
       jsr phaze_init
-      jmp @exit
+      rts
     :
     lda phaze
     cmp #1
@@ -25,17 +25,19 @@
       jsr phaze_select_target
       jsr load_ship
       inc phaze
-      jmp @exit
+      rts
     :   
     lda phaze
     cmp #2
-    bne @exit
+    beq :+
+      rts
+    :
       jsr get_ship_from_map
       ; x - 6 попал, 7 мимо; 5 - повтор
       cpx #$05
       bne :+
          jsr up_indicator
-         jmp @exit
+         rts
       :
       cpx #$07
       bne :+
@@ -47,18 +49,21 @@
          cpx #1
          bne :+
             jsr up_indicator_kill
+            jsr update_around_ship
+            
             jmp @1_2
          :
          jsr down_indicator_kill
          @1_2:
       :
+      jsr update_tile
       lda player1_scoope
       bne @next
         jsr up_indicator
-        rts
+        jmp @2
       @next:
       jsr down_indicator
-      jsr update_tile
+      
 
       ;jsr next_step_player
       @iter:
@@ -87,9 +92,7 @@
         jmp @iter
       @2:
       lda #0
-
       sta update_ready
-    @exit:
     rts
 .endproc
 

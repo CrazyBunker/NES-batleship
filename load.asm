@@ -167,12 +167,39 @@
   rts
 .endproc
 .proc write_zone
+
+  lda table_active
+  asl a
+  tay
+  lda #<tables
+  sta image
+  lda #>tables
+  sta image+1
+  lda (image),y
+  sta tmp_addr
+  iny
+  lda (image),y  
+  sta tmp_addr+1
+
+
   jsr get_address
-  lda table_1,y
+  lda (tmp_addr),y
   bne :+
     lda #20
-    sta table_1,y
-  :
+    sta (tmp_addr),y
+    
+    lda table_active
+    beq :+
+    jsr update_tile
+    lda #7
+    sta ship_fire
+    lda #0
+    sta nmi_ready
+    sta update_ready
+    @loop:
+      lda nmi_ready
+    beq @loop
+    :
   rts
 .endproc
 

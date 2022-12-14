@@ -10,8 +10,7 @@ nmi:
   bne :+
 ; обновление тайлов попаданий или  промахов (вынесено в первую  очередь, так как тайлы должны успеть обновиться в первую очередь)
   lda update_ready
-  cmp #1
-  beq @exit_update
+  bne @exit_update
   ; Загрузка тайла попаданий по проивнику
   ldy PPUSTATUS
   lda high_tile
@@ -20,6 +19,7 @@ nmi:
   sta PPUADDR
   lda ship_fire
   sta PPUDATA
+
   ; Загрузка тайла попаданий по своим кораблям
   ldy PPUSTATUS
   lda high_tile_player

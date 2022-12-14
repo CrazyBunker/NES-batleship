@@ -1,7 +1,5 @@
 .segment "CODE"
 .proc update_tile
-  ; a - старший адрес таблицы
-  ; x - младший адрес таблицы
   lda table_2_background ; младший адрес таблицы
   ldx table_2_background+1 ; старший адрес таблицы
   ldy player_y_map
@@ -21,6 +19,76 @@
   ; x - старший адрес
   stx high_tile
   sta low_tile
+  rts
+.endproc
+
+.proc update_around_ship
+  lda player_x_map
+  pha
+  lda player_y_map
+  pha
+  lda ship_fire
+  pha
+  lda #1
+  sta table_active
+    ldx #0
+    ldy #0
+  @loop:
+    lda table_ships_player,x
+    cmp #1
+    bne @loop_1
+      ; X - номер корабля который убит
+      ; Ищем все координаты кораблей, которые убиты
+         txa
+         clc
+         adc #21
+         @loop_2:
+           pha ; Сохраняем код убитого корабля в стек
+           cmp table_2,y
+           bne @loop_3
+              lda #0
+              sta player_x_map
+              sta player_y_map           
+              ;Получили Y  - смещение в табице - адрес корабля
+              tya
+              : 
+                inc player_y_map
+                sec
+                sbc #10
+              bpl :-
+                dec player_y_map
+                clc
+                adc #10
+                sta player_x_map
+              txa
+              pha
+              tya
+              pha
+              jsr set_zone ; Портит Y
+              pla
+              tay
+              pla
+              tax
+              
+         @loop_3:
+         pla ; выгружаем номер корабля из стека
+         iny
+         cpy #100
+         bne @loop_2
+    @loop_1:
+  inx
+  txa
+  cmp #10
+  bne @loop
+  ; Перебрали все корабли в таблице убитых
+  
+  pla
+  sta ship_fire
+  pla
+  sta player_y_map
+  pla
+  sta player_x_map
+
   rts
 .endproc
 

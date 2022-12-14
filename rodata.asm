@@ -39,5 +39,7 @@ y_max_table2: .byte $B7
 table_1_background: .addr $2064
 table_2_background: .addr $21d1
 
+tables: .addr table_1, table_2
+
 background:
 .incbin  "ns.bin"

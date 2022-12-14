@@ -25,3 +25,4 @@ high_tile_player: .res 1
 low_tile_player: .res 1
 high_tile: .res 1
 low_tile: .res 1
+table_active: .res 1

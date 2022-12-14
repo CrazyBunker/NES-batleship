@@ -32,6 +32,8 @@ main:
   sta type_sprite
   lda #2
   sta pallete_sprite
+  lda #0
+  sta table_active
   ; Включаем графику
   lda PPUSTATUS
   lda #$20
@@ -52,7 +54,7 @@ main:
   lda #0
   sta map_count
   jsr load_map
-  lda #21
+  lda #20
   sta player1_scoope
   sta player2_scoope
   lda #2
